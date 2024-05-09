@@ -22,5 +22,6 @@ jobs:
         runs-on: windows-latest
         steps:
             - name: Echo Hello Windows
+              shell: bash
               run: | 
-                echo "Runner OS: ${{ runner.os }}"
+                echo "Runner OS: $RUNNER_OS"
