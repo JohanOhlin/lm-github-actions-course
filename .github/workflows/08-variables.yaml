@@ -1,7 +1,6 @@
 name: 08 - variables
 
 on:
-    push:
     workflow_dispatch:
 
 env:
@@ -18,7 +17,7 @@ jobs:
                 STEP_VAR: "Step Variable"
                 step_var2: "Step Variable 2"
               run: |
-                echo "STEP_VAR: ${{ env.STEP_VAR }}"
-                echo "step_var2: $step_var2"
+                echo "STEP_VAR: ${{ env.STEP_VAR }} (replaced before execution)"
+                echo "step_var2: $step_var2 (not replaced before execution)"
                 echo "JOB_VAR: ${{ env.JOB_VAR }}"
                 echo "WORKFLOW_VAR: ${{ env.WORKFLOW_VAR }}"
