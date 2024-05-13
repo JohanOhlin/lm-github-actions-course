@@ -16,8 +16,38 @@ on:
                     - '21.x'
                 default: '20.x'
 jobs:
+    install-deps:
+        runs-on: ubuntu-latest
+        defaults: 
+            run:
+                working-directory: 13/react-app
+        outputs:
+            deps-cache-key: ${{ steps.cache-calculation.outputs.CACHE_KEY }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ inputs.node-version }}
+            - name: Calculate cache key
+              id: cache-calculation
+              run: |
+                echo "CACHE_KEY=${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('13/react-app/package-lock.json') }}"
+            - name: Cache node modules
+              uses: actions/cache@v3
+              if: ${{ inputs.use-cache }}
+              id: cache
+              with:
+                  path: 13/react-app/node_modules
+                  key: ${{ steps.cache-calculation.outputs.CACHE_KEY }} 
+            - name: Install dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: npm ci
+        
     build:
         runs-on: ubuntu-latest
+        needs: install-deps
         defaults: 
             run:
                 working-directory: 13/react-app
@@ -27,17 +57,14 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v3
               with:
-                  node-version: ${{ inputs.node-version }}
+                node-version: ${{ inputs.node-version }}
             - name: Cache node modules
               uses: actions/cache@v3
               if: ${{ inputs.use-cache }}
               id: cache
               with:
                   path: 13/react-app/node_modules
-                  key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles('13/react-app/package-lock.json') }}
-            - name: Install dependencies
-              if: steps.cache.outputs.cache-hit != 'true'
-              run: npm ci
+                  key: ${{ needs.install-deps.outputs.deps-cache-key }}
             - name: Run tests
               run: npm run test
             - name: Build
