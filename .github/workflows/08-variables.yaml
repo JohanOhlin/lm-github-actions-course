@@ -26,7 +26,7 @@ jobs:
         steps:
             - name: Print Variables
               run: |
-                echo "Org var: ${{ vars.ORG_VAR }} (replaced before execution)"
+                echo "Org var: ${{ vars.ORG_VAR || 'default value' }} (replaced before execution)"
     echo-prod:
         runs-on: ubuntu-latest
         environment: prod
