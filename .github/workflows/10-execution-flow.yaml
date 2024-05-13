@@ -24,21 +24,33 @@ jobs:
             - name: Install dependencies
               run: npm ci
     unit-test:
+        needs: lint-build
         runs-on: ubuntu-latest
         steps:
             - name: Execute unit tests
               run: npm run test
     deploy-qa:
+        needs: 
+            - unit-test
+            - lint-build
         runs-on: ubuntu-latest
         steps:
             - name: Deploy to QA
               run: echo "Deploy to QA"
     e2e-test:
+        needs: deploy-qa
         runs-on: ubuntu-latest
         steps:
             - name: Execute end to end tests
               run: echo "Executing end to end tests"
+    load-test:
+        needs: e2e-test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Execute load tests
+              run: echo "Executing load tests"
     deploy-prod:
+        needs: e2e-test
         runs-on: ubuntu-latest
         steps:
             - name: Deploy to production
