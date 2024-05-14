@@ -10,6 +10,10 @@ inputs:
     description: 'The working directory to cache dependencies from'
     required: false
     default: .
+  target-env:
+    description: '"dev" or "prod". Controls whether dev dependencies are installed or not'
+    required: false
+    default: dev
 
 runs:
   using: composite
@@ -23,9 +27,9 @@ runs:
       id: cache-deps
       with:
         path: ${{ inputs.working-directory }}/node_modules
-        key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ hashFiles(format('{0}/{1}', inputs.working-directory, 'package-lock.json')) }}
-    - name: Install dependencies
-      if: steps.cache-deps.outputs.cache-hit != 'true'
-      run: npm ci
+        key: ${{ runner.os }}-node-${{ inputs.node-version }}-${{ inputs.target-env }}-${{ hashFiles(format('{0}/{1}', inputs.working-directory, 'package-lock.json')) }}
+    - name: Install dependencies 
+      if: steps.cache-deps.outputs.cache-hit != 'true' 
+      run: ${{ inputs.target-env == 'dev' && 'npm ci' || 'npm ci --omit=dev' }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
